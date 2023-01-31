@@ -1,0 +1,28 @@
+version: '3.9'
+services:
+  cassandra:
+    image: registry.devopsnonprd.vayuktbcs:8083/cassandra:4.0.3
+    restart: always
+    container_name: cassandra
+    environment:
+      - CASSANDRA_LISTEN_ADDRESS=10.247.41.240
+      - CASSANDRA_RPC_ADDRESS=10.247.41.240
+      - CASSANDRA_SEEDS=10.247.41.240,10.247.41.241,10.247.41.242
+      - CASSANDRA_CLUSTER_NAME=KONG
+      - CASSANDRA_DC=KONG-DC1
+      - CASSANDRA_RACK=kong-rack0
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+    network_mode: host
+    healthcheck:
+      test: ["CMD-SHELL", "[ $$(nodetool statusgossip) = running ]"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - ./data:/var/lib/cassandra
+      - ./conf/cassandra.yaml:/etc/cassandra/cassandra.yaml
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "100m" 
